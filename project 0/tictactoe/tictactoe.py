@@ -184,23 +184,28 @@ def utility(board):
         return 0
 
 
-def maxVal(board):
+def maxVal(board, alpha, beta):
     if terminal(board):
         return utility(board)
 
     v = -math.inf
     for action in actions(board):
-        v = max(v, minVal(result(board, action)))
+        v = max(v, minVal(result(board, action), alpha, beta))
+        alpha = max(v, alpha)
+        if alpha >= beta:
+            break
     return v
 
 
-def minVal(board):
+def minVal(board, alpha, beta):
     if terminal(board):
         return utility(board)
-
     v = math.inf
     for action in actions(board):
-        v = min(v, maxVal(result(board, action)))
+        v = min(v, maxVal(result(board, action), alpha, beta))
+        beta = min(v, beta)
+        if alpha >= beta:
+            break
     return v
 
 
@@ -211,28 +216,26 @@ def minimax(board):
     currPlayer = player(board)
     if currPlayer == X:
         maxReq = True
-        corrector = -1
     else:
         maxReq = False
-        corrector = 1
 
     actionsList = actions(board)
-    score = math.inf * corrector
+    currBest = -math.inf
+    currWorst = math.inf
     bestMove = 1, 1
 
     for action in actionsList:
         r = result(board, action)
         if maxReq:
-            mV = minVal(r)
-            if mV > score:
-                score = mV
+            mV = minVal(r, currBest, currWorst)
+            if mV > currBest:
+                currBest = mV
                 bestMove = action
         else:
-            mV = maxVal(r)
-            if mV < score:
-                score = mV
+            mV = maxVal(r, currBest, currWorst)
+            if mV < currWorst:
+                currWorst = mV
                 bestMove = action
-
     return bestMove
 
 
